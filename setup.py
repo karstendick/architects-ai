@@ -11,6 +11,7 @@ setup(name='architectsai',
       py_modules=['architectsai'],
       install_requires=[
           'nose',
+          'numpy',
       ],
       entry_points='''
           [console_scripts]

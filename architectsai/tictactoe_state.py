@@ -11,7 +11,7 @@ class TicTacToeState(GameState):
     self.in_a_row = in_a_row
     self.moves = [{'move': (r, c)} for r in range(num_rows)
                          for c in range(num_cols)]
-    self.to_move = PlayerName('X')
+    self._to_move = PlayerName('X')
     self.other_player = PlayerName('O')
     self.board = defaultdict(str)
     self.winning_player = None
@@ -23,8 +23,8 @@ class TicTacToeState(GameState):
   def get_moves(self) -> List[GameMove]:
     return self.moves
 
-  # def to_move(self) -> PlayerName:
-  #   return self.to_move
+  def to_move(self) -> PlayerName:
+    return self._to_move
 
   def is_terminal(self) -> bool:
     return self.winning_player is not None or len(self.moves) == 0
@@ -41,11 +41,11 @@ class TicTacToeState(GameState):
     (delta_x, delta_y) = delta_x_y
     x, y = move
     n = 0  # n is number of moves in row
-    while self.board.get((x, y)) == self.to_move:
+    while self.board.get((x, y)) == self._to_move:
       n += 1
       x, y = x + delta_x, y + delta_y
     x, y = move
-    while self.board.get((x, y)) == self.to_move:
+    while self.board.get((x, y)) == self._to_move:
       n += 1
       x, y = x - delta_x, y - delta_y
     n -= 1  # Because we counted move itself twice
@@ -56,7 +56,7 @@ class TicTacToeState(GameState):
           self.k_in_row(move, (1, 0)) or
           self.k_in_row(move, (1, -1)) or
           self.k_in_row(move, (1, 1))):
-        self.winning_player = self.to_move
+        self.winning_player = self._to_move
         self.losing_player = self.other_player
   
   def play(self: T, move: GameMove) -> T:
@@ -64,11 +64,11 @@ class TicTacToeState(GameState):
     if move not in self.moves:
       raise ValueError("Illegal move!")
     self.moves.remove(move)
-    self.board[move['move']] = self.to_move
+    self.board[move['move']] = self._to_move
 
     self.check_for_win(move['move'])
 
-    self.to_move, self.other_player = self.other_player, self.to_move
+    self._to_move, self.other_player = self.other_player, self._to_move
     return self
   
   def print_board(self):

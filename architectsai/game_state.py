@@ -26,3 +26,12 @@ class GameState():
     pass
   def play(self: T, move: GameMove) -> T:
     pass
+
+def outcome_map_to_str(outcome_map: OutcomeMap):
+  s = ""
+  for player in outcome_map:
+    s += f"{player}:"
+    for outcome in outcome_map[player]:
+      s += f"{outcome_map[player][outcome]}/"
+    s = s.rstrip("/") + " "
+  return s

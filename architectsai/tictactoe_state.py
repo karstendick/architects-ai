@@ -31,8 +31,10 @@ class TicTacToeState(GameState):
 
   def get_outcome(self) -> OutcomeMap:
     if self.winning_player is None:
+      print("TIE")
       return {PlayerName('X'): {Outcome.TIE: 1, Outcome.WIN: 0, Outcome.LOSS: 0},
               PlayerName('O'): {Outcome.TIE: 1, Outcome.WIN: 0, Outcome.LOSS: 0}}
+    print(f"WIN for {self.winning_player}")
     return {self.winning_player: {Outcome.TIE: 0, Outcome.WIN: 1, Outcome.LOSS: 0},
             self.losing_player: {Outcome.TIE: 0, Outcome.WIN: 0, Outcome.LOSS: 1}}
   
@@ -60,14 +62,14 @@ class TicTacToeState(GameState):
         self.losing_player = self.other_player
   
   def play(self: T, move: GameMove) -> T:
-    print(f"received move: {move}. Available moves are: {self.moves}")
+    # print(f"received move: {move}. Available moves are: {self.moves}")
     if move not in self.moves:
       raise ValueError("Illegal move!")
     self.moves.remove(move)
     self.board[move['move']] = self._to_move
 
     self.check_for_win(move['move'])
-
+    # if not self.is_terminal(): # TODO: ???
     self._to_move, self.other_player = self.other_player, self._to_move
     return self
   

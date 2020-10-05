@@ -1,6 +1,7 @@
 from .tictactoe_state import TicTacToeState
 from .game_state import PlayerName
 from .mcts import mcts
+from .trivial_state import TrivialState
 
 def tictactoe_2_human_players():
   print("Hello, architects!")
@@ -37,6 +38,24 @@ def tictactoe_against_mcts():
       move = mcts(state)
       print(f"MCTS decided to play move: {move}")
       state = state.play(move)
+
+  print("Board: ")
+  state.print_board()
+  print("Game over. Outcome: ", state.get_outcome())
+  print("Goodbye!")
+
+def trivial_against_mcts():
+  state = TrivialState()
+  while not state.is_terminal():
+    to_move = state.to_move()
+    print(f"It's {to_move}'s turn.")
+    moves = state.get_moves()
+    print("Available moves: ", moves)
+
+    move = mcts(state)
+    print(f"MCTS decided to play move: {move}")
+    state = state.play(move)
+      
 
   print("Game over. Outcome: ", state.get_outcome())
   print("Goodbye!")

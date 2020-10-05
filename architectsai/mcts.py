@@ -1,4 +1,4 @@
-from .game_state import GameMove, GameState, Outcome, OutcomeMap, PlayerName
+from .game_state import GameMove, GameState, Outcome, OutcomeMap, PlayerName, outcome_map_to_str
 import time
 import numpy as np
 from math import log2, sqrt
@@ -7,7 +7,7 @@ from typing import List, TypeVar
 from copy import deepcopy
 
 EXPLORE_CONST = 1.414  # sqrt(2) is the theoretical choice
-TIME_BUDGET_S = 10 # How long to give the search to run, in seconds
+TIME_BUDGET_S = 1 # How long to give the search to run, in seconds
 
 T = TypeVar('T', bound='Node')
 
@@ -32,7 +32,7 @@ class Node():
     return f"move: {self.move} | " + \
       f"move history: {self.move_history} | " + \
       f"num children: {len(self.children)} | " + \
-      f"outcomes: {self.outcomes} | " + \
+      f"outcomes: {outcome_map_to_str(self.outcomes)} | " + \
       f"num_playouts: {self.num_playouts} | " + \
       f"player: {self.player} | " + \
       f"parent: [{self.parent}]"
@@ -46,12 +46,13 @@ class Node():
     if self.num_playouts == 0:
       return np.inf
     # outcomes = self.outcomes[self.player]
-    if self.player == self.state.to_move():
-      utility = self.outcomes[self.state.to_move()][Outcome.WIN]
-    else:
-      utility = -self.outcomes[self.state.other_player][Outcome.WIN]
+    print(f"In ucb1, to_move is: {self.state.to_move()}")
+    # if self.player != self.state.to_move():
+    #   utility = self.outcomes[self.state.to_move()][Outcome.WIN]
+    # else:
+    #   utility = -self.outcomes[self.state.other_player][Outcome.WIN]
 
-    # utility = self.utility
+    utility = self.utility
     # utility = self.outcomes[self.player][Outcome.WIN]
     if self.parent is None:
       raise ValueError("ucb1 called on parent node!")
@@ -63,7 +64,7 @@ class Node():
 
 def select(tree: Node):
   while len(tree.children) != 0:
-    # children_nodes = tree.children.values()
+    print(f"In select(), children's to_moves: {[c.state.to_move() for c in tree.children]}")
     max_ucb1_value = max([c.ucb1() for c in tree.children])
     
     # break ties randomly
@@ -90,16 +91,16 @@ def expand(leaf):
 
 
 def simulate(node: Node):
-  state = node.state
+  state = deepcopy(node.state)
   # TODO: terminate playout early sometimes?
   while not state.is_terminal():
     move = choice(state.get_moves())
     state = state.play(move)
   
-  return node.state.get_outcome()
+  return state.get_outcome()
 
 def back_propogate(result: OutcomeMap, node: Node):
-  reward = 1 if result[node.state.to_move()][Outcome.WIN] == 1 else 0
+  reward = 1 if result[node.state.other_player][Outcome.WIN] == 1 else 0
   while node is not None:
     node.num_playouts += 1
 

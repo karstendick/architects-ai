@@ -38,6 +38,15 @@ class TicTacToeState(GameState):
     return {self.winning_player: {Outcome.TIE: 0, Outcome.WIN: 1, Outcome.LOSS: 0},
             self.losing_player: {Outcome.TIE: 0, Outcome.WIN: 0, Outcome.LOSS: 1}}
   
+  def get_utility(self, player: PlayerName) -> float:
+    if not self.is_terminal():
+      raise Exception("get_utility called on non-terminal state!")
+    if self.winning_player == player:
+      return 1
+    if self.winning_player: # The other player won
+      return 0
+    return 0.5 # Tie
+
   def k_in_row(self, move, delta_x_y):
     """Return true if there is a line through move on board for player."""
     (delta_x, delta_y) = delta_x_y
@@ -69,8 +78,8 @@ class TicTacToeState(GameState):
     self.board[move['move']] = self._to_move
 
     self.check_for_win(move['move'])
-    # if not self.is_terminal(): # TODO: ???
-    self._to_move, self.other_player = self.other_player, self._to_move
+    if not self.is_terminal():
+      self._to_move, self.other_player = self.other_player, self._to_move
     return self
   
   def print_board(self):

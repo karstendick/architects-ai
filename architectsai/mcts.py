@@ -45,7 +45,6 @@ class Node():
   def ucb1(self):
     if self.num_playouts == 0:
       return np.inf
-    # outcomes = self.outcomes[self.player]
     print(f"In ucb1, to_move is: {self.state.to_move()}")
     # if self.player != self.state.to_move():
     #   utility = self.outcomes[self.state.to_move()][Outcome.WIN]
@@ -53,11 +52,8 @@ class Node():
     #   utility = -self.outcomes[self.state.other_player][Outcome.WIN]
 
     utility = self.utility
-    # utility = self.outcomes[self.player][Outcome.WIN]
     if self.parent is None:
       raise ValueError("ucb1 called on parent node!")
-      # print(f"In ucb1, self is: {self}")
-      # return utility / self.num_playouts
 
     return utility / self.num_playouts \
       + EXPLORE_CONST * sqrt( log2(self.parent.num_playouts)/self.num_playouts )
@@ -97,18 +93,24 @@ def simulate(node: Node):
     move = choice(state.get_moves())
     state = state.play(move)
   
-  return state.get_outcome()
+  return state.get_utility(node.player)
 
-def back_propogate(result: OutcomeMap, node: Node):
-  reward = 1 if result[node.state.other_player][Outcome.WIN] == 1 else 0
+def back_propogate(reward: float, node: Node):
+  # reward = node.state.get_utility(node.player)
+
+  # if node.player == node.state.other_player and \
+  #   result[node.state.other_player][Outcome.WIN] == 1:
+  #   reward = 1
+  # else:
+  #   reward = 0
   while node is not None:
     node.num_playouts += 1
 
     node.utility += reward
-    reward = 0 if reward == 1 else 1
-    for player_name in result:
-      for outcome in result[player_name]:
-        node.outcomes[player_name][outcome] += result[player_name][outcome]
+    reward = 1 - reward
+    # for player_name in result:
+    #   for outcome in result[player_name]:
+    #     node.outcomes[player_name][outcome] += result[player_name][outcome]
     if node.parent is None:
       return node
     node = node.parent
@@ -145,6 +147,8 @@ def mcts(state: GameState):
   print(f"foo: {foo}")
   print(f"tree: {tree}")
   tree.print_compact()
+  elapsed_time = time.time() - start_time
+  print(f"MCTS played {count} games over {elapsed_time:.2f} seconds to pick its move.")
   return most_playouts_move(tree)
   
 
